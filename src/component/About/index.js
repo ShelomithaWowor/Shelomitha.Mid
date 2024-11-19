@@ -1,4 +1,25 @@
+import React, { useState, useEffect } from "react";
+import { getDatabase, ref, onValue } from "firebase/database";
+import FadeLoader from "react-spinners/FadeLoader";
+
+const override: CSSProperties = {
+  display: "block",
+  margin: "0 auto",
+};
 const About = () => {
+  const [about, setAbout] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const db = getDatabase();
+    setLoading(true);
+    const aboutRef = ref(db, "about");
+    onValue(aboutRef, (snapshot) => {
+      const data = snapshot.val();
+      setAbout(data);
+      setLoading(false);
+    });
+  }, []);
     return (
         <header id="about">
     <a className="btn download" href="#" download>Download PDF</a>
@@ -9,12 +30,17 @@ const About = () => {
       <a href="#contact" title>Contact</a>
     </nav>
     <div className="content-wrap">
-      <img className="profile-img col-narrow" src="img/WhatsApp Image 2024-11-18 at 22.36.28.jpeg" />
+    {!loading && (
+      <div>
+      <img className="profile-img col-narrow" src={`data:image/jpg;base64, ${about.img}`}/>
       <div className="col-wide">
-        <h1>Hi, i am Wowor Shelomitha</h1>
+        <h1>{about.h1}</h1>
         <h2>Web Designer</h2>
-        <p>Student of the Faculty of Computer Science who has high motivation and enthusiasm in the world of education and wants to contribute to existing organizations or communities to develop my interests, can contribute to society and hopefully can bring me positive changes and can be an inspiration for many people.</p>
+        <p>{about.para}</p>
       </div>
+      </div>
+    )}
+    {loading && <FadeLoader cssOverride={override} size={50} />}
     </div>
   </header>
     )
